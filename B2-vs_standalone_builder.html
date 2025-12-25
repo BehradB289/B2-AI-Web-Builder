@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>B15. Visual Studio (Slider & Logo)</title>
+
+    <!-- Core Libs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+      :root {
+        --sidebar-w: 420px;
+        --accent: #ef4444; /* Red-500 */
+        --bg-panel: rgba(15, 23, 42, 0.98);
+        --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: #020617;
+        color: #e2e8f0;
+        overflow: hidden;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+      }
+
+      .app-layout {
+        display: flex;
+        height: 100vh;
+        background: radial-gradient(
+          circle at top right,
+          #3f0000 0%,
+          #000000 100%
+        );
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: var(--sidebar-w);
+        background: var(--bg-panel);
+        border-right: var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        z-index: 30;
+        transition: transform 0.3s ease;
+      }
+      .app-layout.fullscreen .sidebar {
+        margin-left: calc(var(--sidebar-w) * -1);
+      }
+
+      /* Controls */
+      .lbl {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        margin-bottom: 0.2rem;
+        font-weight: 700;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .inp-wrapper {
+        margin-bottom: 0.75rem;
+      }
+      .inp {
+        width: 100%;
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: white;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        outline: none;
+        transition: 0.2s;
+      }
+      .inp:focus {
+        border-color: var(--accent);
+        background: #0f172a;
+      }
+      select.inp {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1em;
+      }
+      input[type="color"] {
+        padding: 0;
+        min-width: 40px;
+        cursor: pointer;
+      }
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--accent);
+      }
+
+      /* Buttons */
+      .action-btn {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #334155;
+        color: #cbd5e1;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.7rem;
+      }
+      .action-btn:hover {
+        background: var(--accent);
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #ef4444;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        background: #1e293b;
+        padding: 4px;
+        margin: 1rem;
+        border-radius: 8px;
+        gap: 2px;
+      }
+      .tab {
+        flex: 1;
+        padding: 8px;
+        text-align: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #94a3b8;
+        transition: 0.2s;
+        text-transform: uppercase;
+      }
+      .tab.active {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4);
+      }
+
+      /* Layer List */
+      .layer {
+        background: #1e293b;
+        padding: 0.6rem;
+        margin-bottom: 0.4rem;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid transparent;
+        transition: 0.2s;
+      }
+      .layer:hover {
+        border-color: #475569;
+      }
+      .layer.active {
+        border-color: var(--accent);
+        background: #1e293b;
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+
+      /* Preview Area */
+      .device-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        perspective: 1500px;
+        overflow: hidden;
+      }
+      .device-frame {
+        background: white;
+        margin: auto;
+        transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+      }
+      .device-frame.desktop {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .device-frame.tablet {
+        width: 800px;
+        height: 95%;
+        border-radius: 24px;
+        border: 12px solid #334155;
+      }
+      .device-frame.mobile {
+        width: 375px;
+        height: 90%;
+        border-radius: 40px;
+        border: 12px solid #334155;
+      }
+
+      /* Theme Cards */
+      .theme-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+      }
+      .theme-card {
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        cursor: pointer;
+        transition: 0.2s;
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: #0f172a;
+      }
+      .theme-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+      .theme-preview {
+        height: 20px;
+        border-radius: 4px;
+        margin-bottom: 6px;
+        background: linear-gradient(45deg, var(--c1), var(--c2));
+      }
+
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 100;
+        background: #1e293b;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border-left: 4px solid var(--accent);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        font-size: 0.75rem;
+        font-weight: 600;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      #toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      #toast.error {
+        border-color: #ef4444;
+        border-left-color: #ef4444;
+      }
+      #toast.warn {
+        border-color: #f59e0b;
+        border-left-color: #f59e0b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-layout" id="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div
+          class="h-16 flex items-center justify-between px-6 border-b border-white/10 bg-[#0f172a]"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 rounded bg-gradient-to-tr from-red-500 to-orange-500 flex items-center justify-center text-white font-bold shadow-lg"
+            >
+              B15
+            </div>
+            <div class="font-bold text-white text-sm">
+              B2. Studio
+              <span class="text-[9px] text-red-400 block font-normal"
+                >SLIDER & LOGO</span
+              >
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="action-btn" onclick="engine.undo()">
+              <i class="fas fa-undo"></i>
+            </button>
+            <button class="action-btn btn-danger" onclick="engine.reset()">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="ui.setTab('layout', this)">
+            LAYOUT
+          </div>
+          <div class="tab" onclick="ui.setTab('content', this)">CONTENT</div>
+          <div class="tab" onclick="ui.setTab('actions', this)">ACTIONS</div>
+          <div class="tab" onclick="ui.setTab('design', this)">DESIGN</div>
+        </div>
+
+        <div
+          class="flex-1 overflow-y-auto custom-scroll"
+          id="panel-content"
+        ></div>
+
+        <div
+          class="p-4 border-t border-white/10 bg-[#0f172a] grid grid-cols-2 gap-3"
+        >
+          <button
+            class="bg-slate-700 hover:bg-slate-600 text-white py-2 rounded font-bold text-xs"
+            onclick="engine.export()"
+          >
+            <i class="fas fa-code mr-1"></i> EXPORT
+          </button>
+          <button
+            class="bg-red-600 hover:bg-red-500 text-white py-2 rounded font-bold text-xs"
+            onclick="engine.saveProject()"
+          >
+            <i class="fas fa-save mr-1"></i> SAVE JSON
+          </button>
+        </div>
+      </aside>
+
+      <!-- PREVIEW -->
+      <main class="flex-1 flex flex-col bg-[#050505]">
+        <div
+          class="h-14 border-b border-white/10 flex items-center justify-between px-6 bg-[#0f172a]/80 backdrop-blur z-20"
+        >
+          <button class="action-btn" onclick="ui.toggleFullscreen()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="flex bg-slate-800 rounded p-1">
+            <button
+              class="action-btn bg-transparent hover:bg-slate-700"
+              onclick="ui.resize('desktop')"
+            >
+              <i class="fas fa-desktop"></i>
+            </button>
+            <button
+              class="action-btn bg-transparent hover:bg-slate-700"
+              onclick="ui.resize('tablet')"
+            >
+              <i class="fas fa-tablet-alt"></i>
+            </button>
+            <button
+              class="action-btn bg-transparent hover:bg-slate-700"
+              onclick="ui.resize('mobile')"
+            >
+              <i class="fas fa-mobile-alt"></i>
+            </button>
+          </div>
+          <div
+            class="text-[10px] font-bold text-red-400 flex items-center gap-2"
+          >
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            PREVIEW
+          </div>
+        </div>
+        <div class="device-wrapper">
+          <div id="wrapper" class="device-frame desktop">
+            <iframe id="preview" class="w-full h-full border-0"></iframe>
+          </div>
+        </div>
+      </main>
+
+      <div id="toast">Saved Successfully</div>
+    </div>
+
+    <!-- Modals & Hidden Inputs -->
+    <input type="file" id="upload" class="hidden" accept="image/*,video/*" />
+    <div
+      id="code-modal"
+      class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-10"
+    >
+      <div
+        class="bg-[#1e293b] w-full max-w-4xl h-full rounded-xl flex flex-col border border-slate-700"
+      >
+        <div class="flex justify-between p-4 border-b border-slate-700">
+          <span class="text-white font-bold">Export Code</span>
+          <button
+            class="text-white"
+            onclick="document.getElementById('code-modal').classList.add('hidden')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <textarea
+          id="code-output"
+          class="flex-1 bg-[#0f172a] text-emerald-400 p-4 font-mono text-xs resize-none outline-none"
+          readonly
+        ></textarea>
+        <div class="p-4 border-t border-slate-700 flex justify-end gap-2">
+          <button
+            class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-bold"
+            onclick="navigator.clipboard.writeText(document.getElementById('code-output').value); alert('Copied!')"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* --- PRESETS --- */
+      const PRESETS = {
+        modern: {
+          primary: "#3b82f6",
+          bg: "#ffffff",
+          text: "#0f172a",
+          card: "#f8fafc",
+          font: "Plus Jakarta Sans",
+          radius: "0.75rem",
+        },
+        dark: {
+          primary: "#10b981",
+          bg: "#0f172a",
+          text: "#f8fafc",
+          card: "#1e293b",
+          font: "Inter",
+          radius: "0.5rem",
+        },
+        elegant: {
+          primary: "#1c1917",
+          bg: "#fafaf9",
+          text: "#292524",
+          card: "#ffffff",
+          font: "Playfair Display",
+          radius: "0px",
+        },
+        cyber: {
+          primary: "#d946ef",
+          bg: "#09090b",
+          text: "#e4e4e7",
+          card: "#18181b",
+          font: "Space Grotesk",
+          radius: "0px",
+        },
+        ocean: {
+          primary: "#0ea5e9",
+          bg: "#f0f9ff",
+          text: "#0c4a6e",
+          card: "#ffffff",
+          font: "Inter",
+          radius: "1rem",
+        },
+        retro: {
+          primary: "#f59e0b",
+          bg: "#fffbeb",
+          text: "#451a03",
+          card: "#fef3c7",
+          font: "Space Grotesk",
+          radius: "0.25rem",
+        },
+        neon: {
+          primary: "#00ff00",
+          bg: "#000000",
+          text: "#e0e0e0",
+          card: "#111111",
+          font: "Courier New",
+          radius: "0px",
+        },
+        corporate: {
+          primary: "#1e3a8a",
+          bg: "#f8fafc",
+          text: "#334155",
+          card: "#ffffff",
+          font: "Inter",
+          radius: "0.25rem",
+        },
+      };
+
+      const DEFAULT_STATE = {
+        meta: { title: "My Awesome Site", author: "B2 User" },
+        theme: { ...PRESETS.modern, api: "" },
+        sections: [
+          {
+            id: "nav",
+            type: "navbar",
+            enabled: true,
+            d: {
+              brand: "B2. Site",
+              logo: "",
+              items: [
+                { t: "Home", l: "#hero" },
+                { t: "Features", l: "#features" },
+                { t: "Contact", l: "#cta" },
+              ],
+              btn: "Login",
+              btn_act: "login",
+              variant: "simple",
+            },
+          },
+          {
+            id: "hero",
+            type: "hero",
+            enabled: true,
+            d: {
+              title: "Design. Build. Launch.",
+              sub: "The most capable visual builder for your next project.",
+              btn1: "Get Started",
+              btn1_act: "scroll:features",
+              btn2: "Learn More",
+              btn2_act: "confetti",
+              variant: "center",
+              img: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1920&q=80",
+            },
+          },
+          {
+            id: "slide",
+            type: "slider",
+            enabled: true,
+            d: {
+              items: [
+                {
+                  t: "First Slide",
+                  d: "Welcome to our site",
+                  img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920",
+                },
+                {
+                  t: "Second Slide",
+                  d: "Best products",
+                  img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1920",
+                },
+              ],
+            },
+          },
+          {
+            id: "features",
+            type: "features",
+            enabled: true,
+            d: {
+              title: "Core Features",
+              sub: "Everything you need.",
+              variant: "grid",
+              items: [
+                { t: "Speed", d: "Optimized.", i: "fas fa-bolt" },
+                { t: "Secure", d: "Bank-grade.", i: "fas fa-shield-alt" },
+                { t: "Global", d: "Worldwide.", i: "fas fa-globe" },
+              ],
+            },
+          },
+          {
+            id: "video",
+            type: "video",
+            enabled: true,
+            d: {
+              title: "Watch Demo",
+              sub: "See it in action.",
+              img: "https://cdn.coverr.co/videos/coverr-walking-in-a-fashion-show-2656/1080p.mp4",
+              btn: "Play",
+              btn_act: "",
+              show_play: true,
+              variant: "overlay",
+            },
+          },
+          {
+            id: "cta",
+            type: "cta",
+            enabled: true,
+            d: {
+              title: "Ready to Start?",
+              sub: "Join thousands of users.",
+              btn: "Sign Up",
+              btn_act: "login",
+              variant: "center",
+            },
+          },
+          {
+            id: "ftr",
+            type: "footer",
+            enabled: true,
+            d: { text: "© 2025 B2. Studio.", variant: "simple" },
+          },
+        ],
+      };
+
+      // TEMPLATES
+      const SECTION_TEMPLATES = {
+        navbar: {
+          brand: "Brand.",
+          logo: "",
+          items: [
+            { t: "Home", l: "#hero" },
+            { t: "Services", l: "#features" },
+            { t: "About", l: "#cta" },
+          ],
+          btn: "Action",
+          btn_act: "",
+          variant: "simple",
+        },
+        hero: {
+          title: "Headline",
+          sub: "Subtitle.",
+          btn1: "Button 1",
+          btn1_act: "",
+          btn2: "Button 2",
+          btn2_act: "",
+          variant: "center",
+          img: "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1920",
+        },
+        slider: {
+          items: [
+            {
+              t: "Slide 1",
+              d: "Description 1",
+              img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920",
+            },
+            {
+              t: "Slide 2",
+              d: "Description 2",
+              img: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1920",
+            },
+          ],
+        },
+        features: {
+          title: "Features",
+          sub: "Subtitle.",
+          variant: "grid",
+          items: [
+            { t: "F1", d: "D1", i: "fas fa-star" },
+            { t: "F2", d: "D2", i: "fas fa-heart" },
+            { t: "F3", d: "D3", i: "fas fa-flag" },
+          ],
+        },
+        text: {
+          title: "About Us",
+          text: "Content goes here.",
+          img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800",
+          variant: "left",
+        },
+        cta: {
+          title: "Call to Action",
+          sub: "Subtitle.",
+          btn: "Click Me",
+          btn_act: "",
+          variant: "center",
+        },
+        product: {
+          title: "Product",
+          price: "$99",
+          desc: "Desc.",
+          img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800",
+          btn: "Buy",
+          btn_act: "checkout",
+        },
+        video: {
+          title: "Watch",
+          sub: "Desc.",
+          img: "https://cdn.coverr.co/videos/coverr-walking-in-a-fashion-show-2656/1080p.mp4",
+          btn: "Play",
+          btn_act: "",
+          show_play: true,
+          variant: "overlay",
+        },
+        gallery: {
+          title: "Gallery",
+          items: [
+            {
+              s: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400",
+            },
+            {
+              s: "https://images.unsplash.com/photo-1529139574466-a302d2d3f524?auto=format&fit=crop&w=400",
+            },
+            {
+              s: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=400",
+            },
+            {
+              s: "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=400",
+            },
+          ],
+        },
+        faq: {
+          title: "FAQ",
+          sub: "Common questions.",
+          variant: "accordion",
+          items: [
+            { q: "Q1?", a: "Answer 1." },
+            { q: "Q2?", a: "Answer 2." },
+          ],
+        },
+        footer: { text: "© 2025.", variant: "simple" },
+      };
+
+      /* --- ENGINE --- */
+      const engine = {
+        state: null,
+        history: [],
+        uploadTarget: null,
+        storageDisabled: false,
+
+        init() {
+          this.storageDisabled = false;
+          // Use NEW key to avoid previous bloated storage
+          const s = localStorage.getItem("b15_state");
+          this.state = s
+            ? JSON.parse(s)
+            : JSON.parse(JSON.stringify(DEFAULT_STATE));
+          this.render();
+          ui.renderPanel("layout");
+
+          window.addEventListener("message", (e) => {
+            if (e.data.type === "update")
+              this.update(e.data.path, e.data.val, true);
+          });
+
+          document.getElementById("upload").addEventListener("change", (e) => {
+            const f = e.target.files[0];
+            if (f && this.uploadTarget) {
+              // Warn for huge files
+              if (f.size > 2000000)
+                ui.showToast("Large file! Storage may fill up.", true);
+
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                this.update(this.uploadTarget, ev.target.result);
+                ui.refresh();
+              };
+              reader.readAsDataURL(f);
+            }
+          });
+        },
+
+        triggerUpload(path) {
+          this.uploadTarget = path;
+          document.getElementById("upload").click();
+        },
+
+        update(path, val, skipRender = false) {
+          if (!skipRender) this.pushHistory();
+          let obj = this.state;
+          const parts = path.split(".");
+          for (let i = 0; i < parts.length - 1; i++) {
+            let p = parts[i];
+            if (p.includes("[")) {
+              const [k, idx] = p.split("[");
+              obj = obj[k][parseInt(idx.replace("]", ""))];
+            } else obj = obj[p];
+          }
+          const last = parts[parts.length - 1];
+          if (last.includes("[")) {
+            const [k, idx] = last.split("[");
+            obj[k][parseInt(idx.replace("]", ""))] = val;
+          } else obj[last] = val;
+
+          if (!skipRender) this.render();
+          this.save();
+        },
+
+        moveSection(idx, dir) {
+          if (idx + dir < 0 || idx + dir >= this.state.sections.length) return;
+          this.pushHistory();
+          const temp = this.state.sections[idx];
+          this.state.sections[idx] = this.state.sections[idx + dir];
+          this.state.sections[idx + dir] = temp;
+          this.render();
+          ui.refresh();
+        },
+
+        addSection(type) {
+          this.pushHistory();
+          const newSec = {
+            id: type + "_" + Date.now().toString().slice(-4),
+            type,
+            enabled: true,
+            d: JSON.parse(JSON.stringify(SECTION_TEMPLATES[type])),
+          };
+          this.state.sections.push(newSec);
+          this.render();
+          ui.renderPanel("layout");
+        },
+
+        applyPreset(key) {
+          this.pushHistory();
+          const p = PRESETS[key];
+          this.state.theme = { ...this.state.theme, ...p };
+          this.render();
+          ui.renderPanel("design");
+        },
+
+        // FIXED SAVE FUNCTION TO HANDLE QUOTA ERRORS
+        save() {
+          if (this.storageDisabled) return; // Don't try if we know it's full
+          try {
+            localStorage.setItem("b15_state", JSON.stringify(this.state));
+            ui.showToast("Saved");
+          } catch (e) {
+            console.error("Storage Error:", e);
+            // Catch QuotaExceededError and disable future saves to prevent crash loops
+            if (e.name === "QuotaExceededError" || e.code === 22) {
+              this.storageDisabled = true;
+              ui.showToast("Storage Full! Export to save.", true);
+            }
+          }
+        },
+
+        clearData() {
+          if (
+            confirm(
+              "Clear local storage? This fixes 'Storage Full' errors but deletes saved data."
+            )
+          ) {
+            localStorage.clear();
+            location.reload();
+          }
+        },
+
+        genHTML(exportMode) {
+          const s = this.state;
+          const t = s.theme;
+          const fontUrl = `https://fonts.googleapis.com/css2?family=${t.font.replace(
+            " ",
+            "+"
+          )}:wght@300;400;600;700&display=swap`;
+
+          const css = `:root { 
+            --p: ${t.primary}; 
+            --bg: ${t.bg}; 
+            --fg: ${t.text}; 
+            --card: ${t.card}; 
+            --rad: ${t.radius}; 
+            --font: '${t.font}', sans-serif;
+          }
+          body { font-family: var(--font); background: var(--bg); color: var(--fg); overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
+          .btn { padding: 0.75rem 1.5rem; border-radius: var(--rad); font-weight: 600; transition: .3s; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+          .btn-p { background: var(--p); color: #fff; border: 1px solid var(--p); }
+          .btn-p:hover { filter: brightness(110%); transform: translateY(-2px); box-shadow: 0 10px 20px -5px var(--p); }
+          .btn-s { border: 1px solid var(--fg); color: var(--fg); background: transparent; }
+          .btn-s:hover { background: var(--fg); color: var(--bg); }
+          .card { background: var(--card); padding: 2rem; border-radius: var(--rad); transition: .3s; }
+          .card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+          .media-cover { width: 100%; height: 100%; object-fit: cover; border-radius: var(--rad); }
+          [contenteditable]:focus { outline: 2px dashed var(--p); border-radius: 4px; }
+          a { text-decoration: none; color: inherit; transition: 0.2s; }
+          
+          /* Modals */
+          .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); opacity: 0; transition: 0.3s; }
+          .modal-overlay.active { display: flex; opacity: 1; }
+          .auth-box { background: var(--card); padding: 2.5rem; border-radius: var(--rad); width: 100%; max-width: 450px; transform: scale(0.9); transition: 0.3s; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--fg); border-opacity: 0.1; position: relative; color: var(--fg); }
+          .modal-overlay.active .auth-box { transform: scale(1); }
+          .form-inp { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: var(--rad); background: var(--bg); border: 1px solid var(--fg); border-opacity: 0.2; color: var(--fg); }
+          .b2-sig { padding: 1rem; text-align: center; font-size: 10px; opacity: 0.4; letter-spacing: 1px; text-transform: uppercase; margin-top: auto; }
+          `;
+
+          let h = `<!DOCTYPE html>
+<!-- ✨ Built with B2. Studio -->
+<html class="scroll-smooth"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://cdn.tailwindcss.com"><\/script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="${fontUrl}" rel="stylesheet"><script src="https://unpkg.com/aos@2.3.1/dist/aos.js"><\/script><link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"><\/script><style>${css}</style></head><body>`;
+
+          if (!exportMode)
+            h += `<script>document.addEventListener('input',e=>{if(e.target.getAttribute('contenteditable')) window.parent.postMessage({type:'update',path:e.target.dataset.path,val:e.target.innerText},'*')});<\/script>`;
+
+          // --- Functional Scripts ---
+          h += `<div id="checkoutModal" class="modal-overlay">
+            <div class="auth-box">
+               <div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold">Checkout</h3><button onclick="closeModal('checkoutModal')"><i class="fas fa-times"></i></button></div>
+               <div class="bg-blue-500/10 p-4 rounded mb-6 flex justify-between items-center"><span>Total</span><span class="font-bold text-xl">$99.00</span></div>
+               <input type="text" placeholder="Card Number" class="form-inp"><button class="btn btn-p w-full" onclick="fakeProcess('checkoutModal', 'Payment Successful!')">Pay Now</button>
+            </div>
+          </div>
+          <div id="loginModal" class="modal-overlay">
+            <div class="auth-box">
+               <div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold">Login</h3><button onclick="closeModal('loginModal')"><i class="fas fa-times"></i></button></div>
+               <input type="email" placeholder="Email" class="form-inp"><input type="password" placeholder="Password" class="form-inp"><button class="btn btn-p w-full" onclick="fakeProcess('loginModal', 'Welcome Back!')">Login</button>
+            </div>
+          </div>
+          <script>
+            function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+            function openModal(id) { document.getElementById(id).classList.add('active'); }
+            function fakeProcess(id, msg) {
+               const btn = document.querySelector('#'+id+' .btn-p'); const old = btn.innerText; btn.innerText = 'Processing...';
+               setTimeout(()=>{ btn.innerText = msg; btn.style.background = '#10b981'; btn.style.color='#fff'; setTimeout(()=>{ closeModal(id); btn.innerText = old; btn.style.background = ''; btn.style.color=''; }, 1000); }, 1000);
+            }
+            function triggerAction(act, el) {
+              if(!act) return;
+              if(act === 'checkout') openModal('checkoutModal');
+              else if(act === 'login') openModal('loginModal');
+              else if(act === 'confetti') confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }});
+              else if(act.startsWith('scroll:')) { const id = act.split(':')[1]; const target = document.getElementById(id); if(target) target.scrollIntoView({behavior:'smooth'}); }
+              else if(act.startsWith('url:')) { window.open(act.split(':')[1], '_blank'); }
+            }
+            
+            // SLIDER LOGIC
+            setInterval(() => {
+               document.querySelectorAll('.slider-container').forEach(c => {
+                  let slides = c.querySelectorAll('.slide');
+                  if(slides.length < 2) return;
+                  let active = c.querySelector('.slide.active');
+                  let next = active.nextElementSibling || slides[0];
+                  active.classList.remove('active');
+                  active.style.opacity = 0;
+                  next.classList.add('active');
+                  next.style.opacity = 1;
+               });
+            }, 5000);
+
+            // GLOBAL EVENT DELEGATION
+            document.addEventListener('click', e => {
+               const btn = e.target.closest('[data-act]');
+               if(btn) { e.preventDefault(); triggerAction(btn.dataset.act, btn); return; }
+
+               const link = e.target.closest('a');
+               if (link) {
+                 const href = link.getAttribute('href');
+                 if (href && href.startsWith('#')) {
+                   e.preventDefault();
+                   const id = href.substring(1);
+                   if(id === '') { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
+                   const target = document.getElementById(id);
+                   if (target) target.scrollIntoView({behavior: 'smooth'});
+                 }
+               }
+            });
+          <\/script>`;
+
+          s.sections.forEach((sec, idx) => {
+            if (!sec.enabled) return;
+            const d = sec.d;
+            const ed = (k) =>
+              !exportMode
+                ? `contenteditable="true" data-path="sections[${idx}].d.${k}"`
+                : "";
+            const aos = (a) => `data-aos="${a}"`;
+            const act = (k) =>
+              d[k + "_act"] ? `data-act="${d[k + "_act"]}"` : "";
+
+            // Renderers
+            if (sec.type === "navbar") {
+              h += `<nav class="sticky top-0 z-50 bg-[var(--bg)]/90 backdrop-blur border-b border-[var(--fg)]/10" id="${
+                sec.id
+              }">
+                <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    ${
+                      d.logo
+                        ? `<img src="${d.logo}" class="h-8 w-auto object-contain">`
+                        : ""
+                    }
+                    <div class="text-2xl font-bold tracking-tighter" ${ed(
+                      "brand"
+                    )}>${d.brand}</div>
+                  </div>
+                  <div class="hidden md:flex gap-8 items-center font-medium">
+                    ${d.items
+                      .map(
+                        (it) =>
+                          `<a href="${it.l}" class="hover:text-[var(--p)] transition">${it.t}</a>`
+                      )
+                      .join("")}
+                    ${
+                      d.variant !== "simple"
+                        ? `<a href="#" class="btn btn-p text-sm" ${ed(
+                            "btn"
+                          )} ${act("btn")}>${d.btn}</a>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              </nav>`;
+            } else if (sec.type === "slider") {
+              h += `<section id="${
+                sec.id
+              }" class="relative h-[600px] overflow-hidden bg-black">
+                 <div class="slider-container h-full w-full relative">
+                   ${d.items
+                     .map(
+                       (it, i) => `
+                     <div class="slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                       i === 0 ? "active" : "opacity-0"
+                     }" style="${i === 0 ? "opacity:1" : ""}">
+                       <img src="${
+                         it.img
+                       }" class="w-full h-full object-cover opacity-60">
+                       <div class="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-6">
+                         <h2 class="text-5xl md:text-7xl font-bold mb-4" ${ed(
+                           `items[${i}].t`
+                         )}>${it.t}</h2>
+                         <p class="text-xl md:text-2xl opacity-90" ${ed(
+                           `items[${i}].d`
+                         )}>${it.d}</p>
+                       </div>
+                     </div>
+                   `
+                     )
+                     .join("")}
+                 </div>
+               </section>`;
+            } else if (sec.type === "hero") {
+              const align =
+                d.variant === "center" ? "text-center mx-auto" : "text-left";
+              const grid =
+                d.variant === "split" ? "grid md:grid-cols-2 gap-12" : "";
+              const media = d.img.includes("mp4")
+                ? `<video src="${d.img}" autoplay muted loop class="media-cover shadow-2xl h-[500px]"></video>`
+                : `<img src="${d.img}" class="media-cover shadow-2xl h-[500px]">`;
+              h += `<section id="${
+                sec.id
+              }" class="py-24 md:py-32 px-6"><div class="max-w-7xl mx-auto ${grid} items-center">
+                <div class="${align} relative z-10">
+                  <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight" ${ed(
+                    "title"
+                  )} ${aos("fade-up")}>${d.title}</h1>
+                  <p class="text-xl opacity-80 mb-8 max-w-2xl ${
+                    d.variant === "center" ? "mx-auto" : ""
+                  }" ${ed("sub")} ${aos("fade-up")}>${d.sub}</p>
+                  <div class="flex gap-4 ${
+                    d.variant === "center" ? "justify-center" : ""
+                  }" ${aos("fade-up")}>
+                    <a href="#" class="btn btn-p" ${ed("btn1")} ${act(
+                "btn1"
+              )}>${d.btn1}</a>
+                    <a href="#" class="btn btn-s" ${ed("btn2")} ${act(
+                "btn2"
+              )}>${d.btn2}</a>
+                  </div>
+                </div>
+                ${
+                  d.variant === "split"
+                    ? `<div ${aos("fade-left")}>${media}</div>`
+                    : ""
+                }
+              </div></section>`;
+            } else if (sec.type === "text") {
+              const order = d.variant === "right" ? "md:order-last" : "";
+              const grid =
+                d.variant === "center" ? "" : "grid md:grid-cols-2 gap-12";
+              const align =
+                d.variant === "center"
+                  ? "text-center max-w-3xl mx-auto"
+                  : "flex flex-col justify-center";
+              h += `<section id="${
+                sec.id
+              }" class="py-24 px-6"><div class="max-w-7xl mx-auto ${grid} items-center">
+                  ${
+                    d.variant !== "center"
+                      ? `<div class="${order}" ${aos("fade-in")}><img src="${
+                          d.img
+                        }" class="media-cover h-[400px] shadow-lg"></div>`
+                      : ""
+                  }
+                  <div class="${align}" ${aos("fade-up")}>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6" ${ed(
+                      "title"
+                    )}>${d.title}</h2>
+                    <div class="opacity-80 leading-relaxed text-lg" ${ed(
+                      "text"
+                    )}>${d.text}</div>
+                  </div>
+               </div></section>`;
+            } else if (sec.type === "cta") {
+              h += `<section id="${
+                sec.id
+              }" class="py-24 px-6"><div class="max-w-5xl mx-auto bg-gradient-to-r from-[var(--p)] to-purple-600 rounded-[var(--rad)] p-12 text-center text-white shadow-2xl" ${aos(
+                "zoom-in"
+              )}>
+                <h2 class="text-3xl md:text-5xl font-bold mb-6" ${ed(
+                  "title"
+                )}>${d.title}</h2>
+                <p class="text-xl opacity-90 mb-8" ${ed("sub")}>${d.sub}</p>
+                <button class="bg-white text-[var(--p)] btn hover:bg-gray-100 font-bold" ${ed(
+                  "btn"
+                )} ${act("btn")}>${d.btn}</button>
+              </div></section>`;
+            } else if (sec.type === "product") {
+              h += `<section id="${
+                sec.id
+              }" class="py-24 px-6 bg-[var(--fg)]/5"><div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                 <div ${aos("fade-right")}><img src="${
+                d.img
+              }" class="media-cover h-[500px] shadow-xl"></div>
+                 <div ${aos("fade-left")}>
+                   <h2 class="text-4xl font-bold mb-4" ${ed("title")}>${
+                d.title
+              }</h2>
+                   <div class="text-3xl font-bold text-[var(--p)] mb-6" ${ed(
+                     "price"
+                   )}>${d.price}</div>
+                   <p class="opacity-70 mb-8 leading-relaxed" ${ed("desc")}>${
+                d.desc
+              }</p>
+                   <button class="btn btn-p w-full md:w-auto text-lg" ${ed(
+                     "btn"
+                   )} ${act("btn")}>${d.btn}</button>
+                 </div>
+               </div></section>`;
+            } else if (sec.type === "video") {
+              const media = d.img.includes("mp4")
+                ? `<video src="${d.img}" autoplay muted loop class="w-full h-full object-cover"></video>`
+                : `<img src="${d.img}" class="w-full h-full object-cover">`;
+              if (d.variant === "overlay") {
+                h += `<section id="${
+                  sec.id
+                }" class="py-24 px-6 bg-black text-white text-center relative overflow-hidden h-[600px] flex items-center justify-center">
+                   <div class="absolute inset-0 opacity-40">${media}</div>
+                   <div class="relative z-10 max-w-4xl mx-auto"><h2 class="text-4xl md:text-6xl font-bold mb-6" ${ed(
+                     "title"
+                   )}>${d.title}</h2><p class="text-xl opacity-90 mb-10" ${ed(
+                  "sub"
+                )}>${d.sub}</p>
+                   ${
+                     d.show_play
+                       ? `<button class="btn btn-p rounded-full w-16 h-16 flex items-center justify-center text-2xl mx-auto" ${act(
+                           "btn"
+                         )}><i class="fas fa-play ml-1"></i></button>`
+                       : ""
+                   }
+                   </div>
+                 </section>`;
+              }
+            } else if (sec.type === "features") {
+              h += `<section id="${
+                sec.id
+              }" class="py-24 px-6 bg-[var(--fg)]/5"><div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16"><h2 class="text-3xl font-bold mb-4" ${ed(
+                  "title"
+                )}>${d.title}</h2><p class="opacity-60" ${ed("sub")}>${
+                d.sub
+              }</p></div>
+                <div class="grid md:grid-cols-3 gap-8">${d.items
+                  .map(
+                    (it, i) =>
+                      `<div class="card bg-[var(--bg)]" ${aos(
+                        "fade-up"
+                      )}><div class="w-12 h-12 rounded bg-[var(--p)] text-white flex items-center justify-center text-xl mb-4"><i class="${
+                        it.i
+                      }"></i></div><h3 class="text-xl font-bold mb-2" ${ed(
+                        `items[${i}].t`
+                      )}>${it.t}</h3><p class="opacity-70" ${ed(
+                        `items[${i}].d`
+                      )}>${it.d}</p></div>`
+                  )
+                  .join("")}</div></div></section>`;
+            } else if (sec.type === "gallery") {
+              h += `<section id="${
+                sec.id
+              }" class="py-24 px-6"><div class="max-w-7xl mx-auto">
+                 <div class="text-center mb-12"><h2 class="text-3xl font-bold" ${ed(
+                   "title"
+                 )}>${d.title}</h2></div>
+                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${d.items
+                   .map(
+                     (it, i) =>
+                       `<div class="aspect-square overflow-hidden rounded-[var(--rad)] group" ${aos(
+                         "zoom-in"
+                       )}><img src="${
+                         it.s
+                       }" class="w-full h-full object-cover transition duration-500 group-hover:scale-110"></div>`
+                   )
+                   .join("")}</div></div></section>`;
+            } else if (sec.type === "faq") {
+              h += `<section id="${
+                sec.id
+              }" class="py-24 px-6"><div class="max-w-3xl mx-auto"><div class="text-center mb-12"><h2 class="text-3xl font-bold" ${ed(
+                "title"
+              )}>${d.title}</h2></div><div class="space-y-4">${d.items
+                .map(
+                  (it, i) =>
+                    `<div class="border border-[var(--fg)]/10 rounded-[var(--rad)] overflow-hidden" ${aos(
+                      "fade-up"
+                    )}><details class="group"><summary class="flex justify-between items-center p-4 cursor-pointer bg-[var(--card)] font-bold"><span ${ed(
+                      `items[${i}].q`
+                    )}>${
+                      it.q
+                    }</span><i class="fas fa-chevron-down transition group-open:rotate-180"></i></summary><div class="p-4 opacity-80 leading-relaxed bg-[var(--bg)]" ${ed(
+                      `items[${i}].a`
+                    )}>${it.a}</div></details></div>`
+                )
+                .join("")}</div></div></section>`;
+            } else if (sec.type === "footer") {
+              h += `<footer id="${
+                sec.id
+              }" class="py-8 text-center text-sm opacity-60 border-t border-[var(--fg)]/10"><p ${ed(
+                "text"
+              )}>${d.text}</p></footer>`;
+            }
+          });
+
+          h += `<div class="b2-sig">Built with B2. Studio</div><script>AOS.init({duration: 800, once: true});<\/script></body></html>`;
+          return h;
+        },
+
+        pushHistory() {
+          if (this.history.length > 10) this.history.shift();
+          this.history.push(JSON.stringify(this.state));
+        },
+        undo() {
+          if (this.history.length > 0) {
+            this.state = JSON.parse(this.history.pop());
+            this.render();
+            ui.refresh();
+          }
+        },
+        save() {
+          localStorage.setItem("b15_state", JSON.stringify(this.state));
+        },
+        reset() {
+          if (confirm("Reset all?")) {
+            localStorage.removeItem("b15_state");
+            location.reload();
+          }
+        },
+        export() {
+          let code = this.genHTML(true);
+          if (window.html_beautify) code = html_beautify(code);
+          document.getElementById("code-output").value = code;
+          document.getElementById("code-modal").classList.remove("hidden");
+        },
+        saveProject() {
+          saveAs(
+            new Blob([JSON.stringify(this.state)], {
+              type: "application/json",
+            }),
+            "project_b15.json"
+          );
+        },
+        render() {
+          document.getElementById("preview").srcdoc = this.genHTML(false);
+        },
+      };
+
+      /* --- UI --- */
+      const ui = {
+        activeTab: "layout",
+        setTab(t, el) {
+          this.activeTab = t;
+          document
+            .querySelectorAll(".tab")
+            .forEach((e) => e.classList.remove("active"));
+          el.classList.add("active");
+          this.renderPanel(t);
+        },
+        refresh() {
+          this.renderPanel(this.activeTab);
+        },
+        resize(m) {
+          document.getElementById("wrapper").className = `device-frame ${m}`;
+        },
+        toggleFullscreen() {
+          document.getElementById("app").classList.toggle("fullscreen");
+        },
+        showToast(msg, isError = false) {
+          const t = document.getElementById("toast");
+          t.innerText = msg;
+          t.className = isError ? "error show" : "show";
+          setTimeout(() => t.classList.remove("show"), 3000);
+        },
+
+        renderPanel(tab) {
+          const c = document.getElementById("panel-content");
+          c.innerHTML = "";
+
+          if (tab === "layout") {
+            const cats = {
+              Structure: ["navbar", "hero", "footer"],
+              Content: ["text", "features", "faq", "cta"],
+              Commerce: ["product"],
+              Media: ["slider", "video", "gallery"],
+            };
+            let addHTML = '<div class="p-4 space-y-4">';
+            Object.keys(cats).forEach((cat) => {
+              addHTML += `<div><div class="text-[10px] text-red-500 font-bold mb-1 ml-1 uppercase">${cat}</div><div class="grid grid-cols-2 gap-2">`;
+              cats[cat].forEach(
+                (type) =>
+                  (addHTML += `<button class="p-2 bg-slate-800 hover:bg-red-600 rounded text-xs text-slate-300 hover:text-white capitalize transition border border-slate-700" onclick="engine.addSection('${type}')">${type}</button>`)
+              );
+              addHTML += `</div></div>`;
+            });
+            addHTML +=
+              '</div><div class="h-px bg-slate-700 mx-4"></div><div class="p-4 space-y-2">';
+            engine.state.sections.forEach((s, i) => {
+              addHTML += `
+              <div class="layer ${s.enabled ? "active" : ""}">
+                <div class="flex flex-col gap-1 w-full">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                       <span class="font-bold text-xs uppercase text-slate-200">${
+                         s.type
+                       }</span>
+                       <span class="text-[9px] bg-slate-700 px-1 rounded text-slate-400">#${
+                         s.id
+                       }</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <input type="checkbox" ${
+                        s.enabled ? "checked" : ""
+                      } onchange="engine.state.sections[${i}].enabled=this.checked;engine.render();ui.refresh()">
+                      <button class="w-6 h-6 hover:text-red-400 text-slate-500" onclick="engine.state.sections.splice(${i},1);engine.render();ui.refresh()"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <div class="flex gap-1 mt-1">
+                    <button class="action-btn w-full" onclick="engine.moveSection(${i},-1)" title="Move Up"><i class="fas fa-chevron-up"></i></button>
+                    <button class="action-btn w-full" onclick="engine.moveSection(${i},1)" title="Move Down"><i class="fas fa-chevron-down"></i></button>
+                  </div>
+                </div>
+              </div>`;
+            });
+            c.innerHTML = addHTML + "</div>";
+          } else if (tab === "actions") {
+            let h = '<div class="p-4 space-y-4">';
+            const sectionIDs = engine.state.sections.map((s) => s.id);
+            engine.state.sections.forEach((s, i) => {
+              if (!s.enabled) return;
+              let btns = [];
+              Object.keys(s.d).forEach((k) => {
+                if (k.startsWith("btn") && !k.endsWith("_act")) btns.push(k);
+              });
+              if (btns.length === 0) return;
+
+              let fields = "";
+              btns.forEach((btnKey) => {
+                const currentAct = s.d[btnKey + "_act"] || "";
+                let extraInput = "";
+                if (currentAct.startsWith("url:"))
+                  extraInput = `<input type="text" class="inp mt-1 text-xs" placeholder="https://..." value="${
+                    currentAct.split("url:")[1]
+                  }" oninput="engine.update('sections[${i}].d.${btnKey}_act', 'url:'+this.value)">`;
+
+                fields += `<div class="mb-3 border-l-2 border-red-500 pl-3">
+                   <div class="text-xs font-bold text-white mb-1 flex justify-between"><span>${
+                     s.d[btnKey]
+                   }</span> <span class="text-[9px] text-slate-500">${btnKey}</span></div>
+                   <select class="inp text-xs" onchange="const val=this.value; engine.update('sections[${i}].d.${btnKey}_act', val); ui.refresh();">
+                     <option value="" ${
+                       currentAct === "" ? "selected" : ""
+                     }>No Action</option>
+                     <option value="checkout" ${
+                       currentAct === "checkout" ? "selected" : ""
+                     }>Open Checkout</option>
+                     <option value="login" ${
+                       currentAct === "login" ? "selected" : ""
+                     }>Open Login</option>
+                     <option value="confetti" ${
+                       currentAct === "confetti" ? "selected" : ""
+                     }>Trigger Confetti</option>
+                     <option value="url:" ${
+                       currentAct.startsWith("url:") ? "selected" : ""
+                     }>Open Link</option>
+                     <optgroup label="Scroll To">
+                       ${sectionIDs
+                         .map(
+                           (sid) =>
+                             `<option value="scroll:${sid}" ${
+                               currentAct === `scroll:${sid}` ? "selected" : ""
+                             }>Scroll to #${sid}</option>`
+                         )
+                         .join("")}
+                     </optgroup>
+                   </select>
+                   ${extraInput}
+                 </div>`;
+              });
+              h += `<div class="bg-slate-800 p-3 rounded border border-slate-700"><div class="font-bold text-xs uppercase mb-2 text-slate-400">#${s.id} - ${s.type}</div>${fields}</div>`;
+            });
+            c.innerHTML = h + "</div>";
+          } else if (tab === "content") {
+            let h = '<div class="p-4 space-y-4">';
+            engine.state.sections.forEach((s, i) => {
+              if (!s.enabled) return;
+              let fields = "";
+              Object.keys(s.d).forEach((k) => {
+                if (k === "items" || k.endsWith("_act")) return;
+                if (k === "show_play") {
+                  fields += `<div class="mb-2 flex items-center justify-between"><div class="lbl">SHOW PLAY BUTTON</div><input type="checkbox" ${
+                    s.d[k] ? "checked" : ""
+                  } onchange="engine.update('sections[${i}].d.show_play', this.checked)"></div>`;
+                  return;
+                }
+
+                const isMedia =
+                  k.includes("img") || k.includes("src") || k === "logo";
+                if (typeof s.d[k] !== "object" && k.length < 100)
+                  fields += `<div class="mb-2"><div class="lbl">${k}</div><div class="flex gap-2"><input class="inp" value="${
+                    s.d[k]
+                  }" oninput="engine.update('sections[${i}].d.${k}', this.value)">${
+                    isMedia
+                      ? `<button class="action-btn" onclick="engine.triggerUpload('sections[${i}].d.${k}')"><i class="fas fa-upload"></i></button>`
+                      : ""
+                  }</div></div>`;
+              });
+              if (s.d.items) {
+                fields += `<div class="mt-2 border-t border-slate-700 pt-2"><div class="lbl">ITEMS (${s.d.items.length})</div>`;
+                s.d.items.forEach((it, idx) => {
+                  fields += `<div class="mb-2 pl-2 border-l-2 border-slate-600 bg-black/20 rounded p-2">`;
+                  Object.keys(it).forEach((ik) => {
+                    const isMedia =
+                      ik === "s" ||
+                      ik === "img" ||
+                      (ik === "i" && it[ik].includes("http"));
+
+                    let label = ik.toUpperCase();
+                    if (ik === "t") label = "TEXT";
+                    if (ik === "l") label = "LINK / TARGET";
+                    if (ik === "d") label = "DESCRIPTION";
+                    if (ik === "s") label = "SOURCE";
+
+                    fields += `<div class="flex flex-col gap-1 mb-2"><span class="text-[9px] text-slate-500 font-bold">${label}</span><div class="flex gap-1"><input class="inp text-xs" value="${
+                      it[ik]
+                    }" oninput="engine.update('sections[${i}].d.items[${idx}].${ik}', this.value)">${
+                      isMedia
+                        ? `<button class="action-btn w-6 h-6" onclick="engine.triggerUpload('sections[${i}].d.items[${idx}].${ik}')"><i class="fas fa-upload text-[10px]"></i></button>`
+                        : ""
+                    }</div></div>`;
+                  });
+                  fields += `</div>`;
+                });
+                fields += `</div>`;
+              }
+              h += `<div class="bg-slate-800 p-3 rounded border border-slate-700"><div class="font-bold text-xs uppercase mb-2 text-slate-400">${s.type}</div>${fields}</div>`;
+            });
+            c.innerHTML = h + "</div>";
+          } else if (tab === "design") {
+            let h = `<div class="p-4">
+              <div class="lbl mb-2">PRESETS</div>
+              <div class="theme-grid mb-6">
+                ${Object.keys(PRESETS)
+                  .map(
+                    (k) =>
+                      `<div class="theme-card" onclick="engine.applyPreset('${k}')"><div class="theme-preview" style="--c1:${
+                        PRESETS[k].primary
+                      };--c2:${PRESETS[k].bg}"></div>${k.toUpperCase()}</div>`
+                  )
+                  .join("")}
+              </div>
+              <div class="space-y-4">
+                <div><div class="lbl">Primary Color</div><div class="flex gap-2"><input type="color" value="${
+                  engine.state.theme.primary
+                }" oninput="engine.state.theme.primary=this.value;engine.render()"><input type="text" class="inp" value="${
+              engine.state.theme.primary
+            }" oninput="engine.state.theme.primary=this.value;engine.render()"></div></div>
+                <div><div class="lbl">Background Color</div><div class="flex gap-2"><input type="color" value="${
+                  engine.state.theme.bg
+                }" oninput="engine.state.theme.bg=this.value;engine.render()"><input type="text" class="inp" value="${
+              engine.state.theme.bg
+            }" oninput="engine.state.theme.bg=this.value;engine.render()"></div></div>
+                <div><div class="lbl">Text Color</div><div class="flex gap-2"><input type="color" value="${
+                  engine.state.theme.text
+                }" oninput="engine.state.theme.text=this.value;engine.render()"><input type="text" class="inp" value="${
+              engine.state.theme.text
+            }" oninput="engine.state.theme.text=this.value;engine.render()"></div></div>
+                <div><div class="lbl">Card Color</div><div class="flex gap-2"><input type="color" value="${
+                  engine.state.theme.card
+                }" oninput="engine.state.theme.card=this.value;engine.render()"><input type="text" class="inp" value="${
+              engine.state.theme.card
+            }" oninput="engine.state.theme.card=this.value;engine.render()"></div></div>
+                <div class="pt-4 border-t border-slate-700">
+                  <button class="w-full bg-slate-800 hover:bg-red-900/50 text-red-400 p-2 rounded text-xs font-bold border border-red-900/30" onclick="engine.clearData()"><i class="fas fa-trash-alt mr-2"></i> Clear Cached Data</button>
+                  <p class="text-[9px] text-slate-500 mt-2 text-center">Use if storage is full or app is slow.</p>
+                </div>
+              </div>
+             </div>`;
+            c.innerHTML = h;
+          }
+        },
+      };
+
+      engine.init();
+    </script>
+  </body>
+</html>
