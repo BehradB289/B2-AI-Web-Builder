@@ -3,7 +3,7 @@
 > **Generate production-ready websites in seconds using Natural Language Processing.**
 > *Powered by Google Gemini 2.0 Flash & Python.*
 
-![Demo Video]()
+![Demo Video](https://github.com/BehradB289/B2-AI-Web-Builder/blob/main/Screen%20Recording%202025-12-25%20201736.mp4)
 *(Upload your video in the issue or simply drag and drop it here to get a link)*
 
 ## 🛑 The Problem
