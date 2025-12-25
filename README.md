@@ -33,3 +33,15 @@ pip install google-generativeai flask flask-cors
 3.Add your API Key in ai_builder.py.
 4.Run the engine:
 python ai_builder.py
+## 🎨 Bonus: Standalone Visual Builder (No AI)
+This repository also includes a **client-side only version** for manual design without needing Python or an API Key.
+
+- **File:** `B2-vs_standalone_builder.html`
+- **Features:**
+  - ⚡ **Zero Setup:** Just double-click to run in any browser.
+  - 🛠 **Visual Editor:** Drag-and-drop sections, change themes, and edit content manually.
+  - 💾 **Local Storage:** Saves your progress automatically in the browser.
+  - 🎨 **Preset Themes:** Includes Modern, Cyber, Retro, and Corporate presets.
+
+**How to use:**
+Simply download `B2-vs_standalone_builder.html` and open it in Chrome, Edge, or Firefox. No installation required!
