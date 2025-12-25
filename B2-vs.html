@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>B2 Studio | AI Website Builder</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-dark: #0f172a;
+        --bg-panel: #1e293b;
+        --border: #334155;
+        --accent: #3b82f6;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+      }
+
+      body {
+        background-color: #020617;
+        color: var(--text-main);
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+      }
+
+      /* --- SIDEBAR --- */
+      .sidebar {
+        width: 320px;
+        background: var(--bg-dark);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        z-index: 20;
+      }
+
+      .brand {
+        height: 60px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        gap: 10px;
+        background: #0b1120;
+      }
+
+      .brand-logo {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: white;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+      }
+
+      .tools-panel {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+      }
+
+      .layer-card {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .layer-card:hover {
+        border-color: var(--accent);
+      }
+      .layer-icon {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-right: 8px;
+      }
+
+      .action-bar {
+        padding: 1rem;
+        border-top: 1px solid var(--border);
+        background: #0b1120;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      /* --- WORKSPACE --- */
+      .workspace {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #050505;
+        position: relative;
+        background-image: radial-gradient(#1e293b 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+
+      .toolbar {
+        height: 50px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-dark);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+
+      .device-toggle {
+        display: flex;
+        background: var(--bg-panel);
+        border-radius: 6px;
+        padding: 2px;
+        border: 1px solid var(--border);
+      }
+      .dt-btn {
+        padding: 4px 10px;
+        border-radius: 4px;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: 0.2s;
+      }
+      .dt-btn.active {
+        background: var(--accent);
+        color: white;
+      }
+
+      .preview-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        overflow: hidden;
+      }
+
+      #preview-frame {
+        background: white;
+        border: none;
+        transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.6);
+      }
+      /* Device Sizes */
+      .device-desktop {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+      }
+      .device-mobile {
+        width: 375px;
+        height: 812px;
+        border-radius: 30px;
+        border: 8px solid #333;
+      }
+
+      /* --- AI MODAL --- */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-box {
+        width: 500px;
+        background: #1e293b;
+        border: 1px solid #475569;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        animation: slideUp 0.3s ease-out;
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .ai-input {
+        width: 100%;
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        min-height: 100px;
+        margin: 15px 0;
+        outline: none;
+        font-family: "Inter", sans-serif;
+        resize: none;
+      }
+      .ai-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: 0.2s;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #2563eb;
+      }
+      .btn-secondary {
+        background: #334155;
+        color: white;
+      }
+      .btn-secondary:hover {
+        background: #475569;
+      }
+
+      .loading-bar {
+        height: 3px;
+        width: 100%;
+        background: #0f172a;
+        overflow: hidden;
+        border-radius: 10px;
+        display: none;
+      }
+      .loading-progress {
+        height: 100%;
+        width: 50%;
+        background: var(--accent);
+        animation: indeterminate 1s infinite linear;
+      }
+      @keyframes indeterminate {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(200%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">B2</div>
+        <div>
+          <div class="text-sm font-bold tracking-wide">B2 Studio</div>
+          <div class="text-[10px] text-blue-400 font-mono">
+            ULTIMATE EDITION
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-b border-slate-700">
+        <button
+          onclick="ui.openAI()"
+          class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 rounded-lg font-bold shadow-lg shadow-blue-500/20 transition flex items-center justify-center gap-2"
+        >
+          <i class="fas fa-magic"></i> GENERATE WITH AI
+        </button>
+      </div>
+
+      <div
+        class="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider"
+      >
+        Project Layers
+      </div>
+
+      <div class="tools-panel custom-scroll" id="layers-panel">
+        <div class="text-center text-slate-500 text-xs mt-10">
+          <i class="fas fa-cube mb-2 text-2xl opacity-20"></i><br />
+          No website generated yet.<br />Click "Generate" to start.
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button
+          onclick="core.download()"
+          class="btn btn-secondary justify-center text-xs"
+        >
+          <i class="fas fa-download"></i> EXPORT HTML
+        </button>
+        <button
+          onclick="alert('Project saved automatically to memory.')"
+          class="btn btn-secondary justify-center text-xs"
+        >
+          <i class="fas fa-save"></i> SAVE
+        </button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="toolbar">
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+          <i class="fas fa-circle text-green-500 text-[8px]"></i> System Ready
+        </div>
+
+        <div class="device-toggle">
+          <div class="dt-btn active" onclick="ui.setDevice('desktop', this)">
+            <i class="fas fa-desktop"></i>
+          </div>
+          <div class="dt-btn" onclick="ui.setDevice('mobile', this)">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500 font-mono">index.html</div>
+      </div>
+
+      <div class="preview-container">
+        <iframe id="preview-frame" class="device-desktop"></iframe>
+      </div>
+    </main>
+
+    <div class="modal-overlay" id="ai-modal">
+      <div class="modal-box">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-white">
+            <i class="fas fa-robot text-blue-500 mr-2"></i>B2 AI Architect
+          </h2>
+          <button
+            onclick="ui.closeAI()"
+            class="text-slate-400 hover:text-white"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <p class="text-sm text-slate-400">
+          Describe the website you want. Be specific about colors, style, and
+          content.
+        </p>
+
+        <textarea
+          id="ai-prompt"
+          class="ai-input"
+          placeholder="Example: A dark modern gym website with red neon lights, showing bodybuilders and equipment..."
+        ></textarea>
+
+        <div class="loading-bar mb-4" id="ai-loader">
+          <div class="loading-progress"></div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button onclick="ui.closeAI()" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button onclick="core.generate()" class="btn btn-primary">
+            <i class="fas fa-bolt"></i> BUILD SITE
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const core = {
+        state: {
+          meta: { title: "Untitled Project" },
+          theme: {
+            primary: "#3b82f6",
+            bg: "#ffffff",
+            text: "#1e293b",
+            font: "Inter",
+            radius: "8px",
+          },
+          sections: [],
+        },
+
+        async generate() {
+          const prompt = document.getElementById("ai-prompt").value;
+          if (!prompt) return alert("Please type a description!");
+
+          ui.toggleLoading(true);
+
+          try {
+            const response = await fetch("http://localhost:5000/generate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: prompt }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+              alert("AI Error: " + data.error);
+            } else {
+              this.state = data;
+              this.render();
+              ui.closeAI();
+              ui.updateLayers();
+            }
+          } catch (err) {
+            alert("⚠️ Server Error! Make sure B2_Engine.exe is running.");
+            console.error(err);
+          } finally {
+            ui.toggleLoading(false);
+          }
+        },
+
+        // --- SMART IMAGE ENGINE ---
+        getImageUrl(prompt) {
+          if (!prompt) return "";
+          // Adds a random seed to prevent caching and ensures new images every time
+          const seed = Math.floor(Math.random() * 1000);
+          // URL encode the prompt to handle spaces and special chars safely
+          const cleanPrompt = encodeURIComponent(prompt);
+          return `https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=600&nologo=true&seed=${seed}`;
+        },
+
+        // --- HTML COMPILER ---
+        compileHTML() {
+          const s = this.state;
+          const t = s.theme;
+
+          const css = `
+                    :root { --p: ${t.primary}; --bg: ${t.bg}; --fg: ${t.text}; --card: ${t.card}; --rad: ${t.radius}; }
+                    html { scroll-behavior: smooth; }
+                    body { background: var(--bg); color: var(--fg); font-family: ${t.font}, sans-serif; margin:0; line-height:1.6; }
+                    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+                    section { padding: 80px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+                    .btn { background: var(--p); color: #fff; padding: 12px 24px; border-radius: var(--rad); text-decoration: none; font-weight: bold; display: inline-block; transition:0.3s; border:none; cursor:pointer; }
+                    .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+                    h1, h2, h3 { line-height: 1.2; margin-bottom: 1rem; font-weight: 800; }
+                    img { max-width: 100%; border-radius: var(--rad); display:block; object-fit:cover; background: #eee; min-height: 200px; }
+                    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+                    .card { background: var(--card); padding: 25px; border-radius: var(--rad); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: 0.3s; }
+                    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+                    nav { padding: 20px 0; display: flex; justify-content: space-between; align-items: center; position:sticky; top:0; background:var(--bg); z-index:10; border-bottom:1px solid rgba(0,0,0,0.05); }
+                `;
+
+          // Smart Script for Button Logic & Image Fallback
+          const smartScript = `
+                    <script>
+                        // Button Logic
+                        document.addEventListener('click', (e) => {
+                            if(e.target.classList.contains('btn')) {
+                                e.preventDefault();
+                                const text = e.target.innerText.toLowerCase();
+                                if(text.includes('contact')) window.scrollTo(0, document.body.scrollHeight);
+                                else if(text.includes('start') || text.includes('view') || text.includes('learn')) {
+                                    const sections = document.querySelectorAll('section');
+                                    if(sections[1]) sections[1].scrollIntoView();
+                                } else {
+                                    alert('Demo Link: This would open a real page in the final version.');
+                                }
+                            }
+                        });
+                        // Image Fallback Logic
+                        function fixImg(img) {
+                            img.onerror = null;
+                            img.src = 'https://placehold.co/800x600?text=No+Image+Available';
+                        }
+                    <\/script>
+                `;
+
+          let html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${
+            s.meta.title
+          }</title><link href="https://fonts.googleapis.com/css2?family=${t.font.replace(
+            " ",
+            "+"
+          )}:wght@400;700&display=swap" rel="stylesheet"><style>${css}</style></head><body><div class="container">`;
+
+          s.sections.forEach((sec) => {
+            const d = sec.d;
+            // Add ID to sections for scrolling
+            const secId =
+              sec.type + "_" + Math.random().toString(36).substr(2, 5);
+
+            if (sec.type === "navbar") {
+              html += `<nav><div style="font-size:1.5rem; color:var(--p); font-weight:900;">${
+                d.title
+              }</div><a href="#" class="btn">${
+                d.btn || "Get Started"
+              }</a></nav>`;
+            } else if (sec.type === "hero") {
+              html += `<section id="${secId}" style="text-align:center; padding: 100px 0;">
+                            <h1 style="font-size:3.5rem;">${d.title}</h1>
+                            <p style="opacity:0.8; font-size:1.2rem; max-width:600px; margin:0 auto 30px;">${
+                              d.sub
+                            }</p>
+                            <a href="#" class="btn">${d.btn}</a>
+                            ${
+                              d.img_prompt
+                                ? `<div style="margin-top:50px;"><img src="${this.getImageUrl(
+                                    d.img_prompt
+                                  )}" onerror="fixImg(this)" alt="Hero"></div>`
+                                : ""
+                            }
+                        </section>`;
+            } else if (sec.type === "features" || sec.type === "gallery") {
+              html += `<section id="${secId}">
+                            <div style="text-align:center; margin-bottom:50px;"><h2>${
+                              d.title
+                            }</h2><p>${d.sub}</p></div>
+                            <div class="grid">
+                                ${(d.items || [])
+                                  .map(
+                                    (i) => `
+                                    <div class="card">
+                                        ${
+                                          i.img_prompt
+                                            ? `<img src="${this.getImageUrl(
+                                                i.img_prompt
+                                              )}" onerror="fixImg(this)" style="height:220px; width:100%; object-fit:cover; margin-bottom:15px;">`
+                                            : ""
+                                        }
+                                        <h3>${
+                                          i.title
+                                        }</h3><p style="opacity:0.7">${
+                                      i.sub || ""
+                                    }</p>
+                                    </div>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </section>`;
+            } else if (sec.type === "cta") {
+              html += `<section id="${secId}" style="text-align:center; background:var(--card); padding:60px; border-radius:var(--rad)">
+                            <h2>${d.title}</h2><p style="margin-bottom:20px">${d.sub}</p><a href="#" class="btn">${d.btn}</a>
+                         </section>`;
+            } else if (sec.type === "footer") {
+              html += `<footer id="footer" style="text-align:center; padding:40px; opacity:0.6; margin-top:50px; border-top:1px solid #ccc;"><p>${d.title}</p></footer>`;
+            }
+          });
+
+          html += `</div>${smartScript}</body></html>`;
+          return html;
+        },
+
+        render() {
+          const iframe = document.getElementById("preview-frame");
+          iframe.srcdoc = this.compileHTML();
+        },
+
+        download() {
+          const blob = new Blob([this.compileHTML()], { type: "text/html" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "B2_Project.html";
+          link.click();
+        },
+      };
+
+      const ui = {
+        openAI: () =>
+          (document.getElementById("ai-modal").style.display = "flex"),
+        closeAI: () =>
+          (document.getElementById("ai-modal").style.display = "none"),
+        toggleLoading: (show) =>
+          (document.getElementById("ai-loader").style.display = show
+            ? "block"
+            : "none"),
+
+        setDevice(mode, btn) {
+          document
+            .querySelectorAll(".dt-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const frame = document.getElementById("preview-frame");
+          frame.className =
+            mode === "mobile" ? "device-mobile" : "device-desktop";
+        },
+
+        updateLayers() {
+          const list = document.getElementById("layers-panel");
+          if (!core.state.sections.length) return;
+          list.innerHTML = core.state.sections
+            .map(
+              (s, i) => `
+                    <div class="layer-card">
+                        <div class="flex items-center">
+                            <i class="fas fa-layer-group layer-icon"></i>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">${s.type.toUpperCase()}</div>
+                                <div class="text-[10px] text-slate-500 truncate w-32">${
+                                  s.d.title
+                                }</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-500">#${
+                          i + 1
+                        }</span>
+                    </div>
+                `
+            )
+            .join("");
+        },
+      };
+
+      window.onload = () => {
+        const iframe = document.getElementById("preview-frame");
+        iframe.srcdoc = `<html><body style="display:flex;justify-content:center;align-items:center;height:100vh;background:#fff;font-family:sans-serif;color:#888;"><h2>System Ready.<br>Waiting for AI Command...</h2></body></html>`;
+      };
+    </script>
+  </body>
+</html>
