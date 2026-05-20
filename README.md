@@ -110,10 +110,11 @@ MIT License
 
 ---
 
-# 📢 Announcement: B2. Omni-Builder Manual Edition (v4.0) is Out!
+# 📢 Announcement: B2. Omni-Builder v4.0 (Manual Edition) is Live!
 
-> **Looking for absolute, pixel-perfect manual control over your designs?**
-> We have officially released [**B2. Omni-Builder v4.0**](https://github.com/BehradB289/B2-OmniBuilder)! 
-> While this Python & Gemini AI agent automated repo handles text-to-site generative builds, the new **Manual Edition** gives you absolute design freedom. No Python setup, no API keys, and zero dependencies—just pure, high-fidelity visual building with exact pixel control.
+> **Looking for a professional manual visual builder?**
+> We have officially released [**B2. Omni-Builder v4.0**](https://github.com/BehradB289/B2-OmniBuilder)!
+> Unlike previous manual scripts, this version features a fully integrated **Omni-Purpose Compiler**, professional telemetry dashboards, and high-fidelity design presets. It’s the ultimate manual toolkit for building production-ready web apps without any dependencies.
 >
-> 👉 **[Check out B2. Omni-Builder v4.0 on GitHub!](https://github.com/BehradB289/B2-OmniBuilder)**
+> 👉 **[Check out the new B2. Omni-Builder v4.0 here!](https://github.com/BehradB289/B2-OmniBuilder)**
+> 
