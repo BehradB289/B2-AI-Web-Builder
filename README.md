@@ -107,3 +107,13 @@ This project is currently being prepared for the **Kharazmi Youth Award**. Howev
 ## 📜 License
 
 MIT License
+
+---
+
+# 📢 Announcement: B2. Omni-Builder Manual Edition (v4.0) is Out!
+
+> **Looking for absolute, pixel-perfect manual control over your designs?**
+> We have officially released [**B2. Omni-Builder v4.0**](https://github.com/BehradB289/B2-OmniBuilder)! 
+> While this Python & Gemini AI agent automated repo handles text-to-site generative builds, the new **Manual Edition** gives you absolute design freedom. No Python setup, no API keys, and zero dependencies—just pure, high-fidelity visual building with exact pixel control.
+>
+> 👉 **[Check out B2. Omni-Builder v4.0 on GitHub!](https://github.com/BehradB289/B2-OmniBuilder)**
